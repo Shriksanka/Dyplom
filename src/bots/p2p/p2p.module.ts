@@ -1,31 +1,24 @@
 import { Module, OnModuleInit } from '@nestjs/common';
 import { P2pService } from './p2p.service';
-import { MerchantApiModule } from '../../common/merchant/merchant.module';
 import { P2pUpdates } from './p2p.updates';
 import { CommonModule } from './providers/common/common.module';
 import { P2pController } from './p2p.controller';
-import { PaymentServiceModule } from '../../common/payment-service/payment-service.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { InjectBot, TelegrafModule } from 'nestjs-telegraf';
 import { Redis as TelegrafRedis } from '@telegraf/session/redis';
 import { Telegraf, session } from 'telegraf';
-import { WalletSetupModule } from './scenes/wallet-setup/wallet-setup.module';
 import { ReportScene } from './scenes/report.scene';
 import { FxReportStatsScene } from './scenes/fxstats_report.scene';
 import { FxReportScene } from './scenes/fxreport_pending.scene';
 import { SheetsService } from '../../common/googleapis/sheets/sheets.service';
-import { ReportTriggersService } from './strategy/triggers/report-trigger.service';
 import { ReportStrategyModule } from './strategy/report-strategy.module';
 import { ReportDetailedScene } from './scenes/report_detailed.scene';
 import { NotifyAccountScene } from './scenes/notify_account.scene';
 
 @Module({
   imports: [
-    MerchantApiModule,
     CommonModule,
-    PaymentServiceModule,
     ConfigModule,
-    WalletSetupModule,
     ReportStrategyModule,
     TelegrafModule.forRootAsync({
       botName: 'p2p',
@@ -56,7 +49,6 @@ import { NotifyAccountScene } from './scenes/notify_account.scene';
     FxReportStatsScene,
     FxReportScene,
     SheetsService,
-    ReportTriggersService,
     NotifyAccountScene,
   ],
   exports: [P2pService],

@@ -175,22 +175,6 @@ export class ZendeskService {
   private _buildCustomFields(params: CreateTicketParams) {
     const custom_fields = [];
 
-    if (params.emailInfo) {
-      custom_fields.push(ZENDESK_CUSTOM_FIELDS.MERCHANT_EMAIL_INFO(params));
-    }
-
-    if (params.telegramInfo) {
-      custom_fields.push(ZENDESK_CUSTOM_FIELDS.TELEGRAM_CHAT_INFO(params));
-    }
-
-    if (params.utr) {
-      custom_fields.push(ZENDESK_CUSTOM_FIELDS.UTR(params));
-    }
-
-    if (params.orderId) {
-      custom_fields.push(ZENDESK_CUSTOM_FIELDS.ORDER_ID(params));
-    }
-
     return custom_fields;
   }
 

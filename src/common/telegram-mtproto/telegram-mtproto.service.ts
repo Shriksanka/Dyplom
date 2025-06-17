@@ -3,7 +3,6 @@ import { TelegramClient } from 'telegram';
 import { StringSession } from 'telegram/sessions';
 import { Api } from 'telegram/tl';
 import { ConfigService } from '@nestjs/config';
-import { InjectRepository } from '../../database/redis/core/decoratos';
 import { Repository } from '../../database/redis/core/repository';
 import { TelegramState } from '../../database/redis/schemas/telegram-state.schema';
 import { ZendeskService } from '../zendesk/zendesk.service';
@@ -15,14 +14,11 @@ export class TelegramMtprotoService {
   private _apiHash: string;
   private _phoneNumber: string;
   private _phoneCodeHash: string;
-  private _slipHandler: SlipHandler;
 
   constructor(
     private readonly configService: ConfigService,
     @InjectRepository('TelegramState')
     private readonly telegramState: Repository,
-    private readonly merchantApiService: MerchantApiService,
-    private readonly utrCheckerService: UtrCheckerService,
     private readonly zendeskService: ZendeskService,
     @InjectModel(Request)
     private readonly requestModel: typeof Request,
@@ -30,14 +26,6 @@ export class TelegramMtprotoService {
     this._apiId = this.configService.get('TELEGRAM_API_ID');
     this._apiHash = this.configService.get('TELEGRAM_API_HASH');
     this._phoneNumber = this.configService.get('TELEGRAM_PHONE_NUMBER');
-
-    this._slipHandler = new SlipHandler(
-      this.merchantApiService,
-      this.utrCheckerService,
-      this.zendeskService,
-      this.requestModel,
-      'telegram_proto',
-    );
   }
 
   async registerSession() {

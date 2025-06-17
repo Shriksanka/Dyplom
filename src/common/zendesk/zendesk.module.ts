@@ -2,7 +2,6 @@ import { Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ZendeskService } from './zendesk.service';
 import { HttpModule } from '@nestjs/axios';
-import { GmailModule } from '../googleapis/gmail/gmail.module';
 
 @Module({
   imports: [
@@ -16,7 +15,7 @@ import { GmailModule } from '../googleapis/gmail/gmail.module';
       }),
       inject: [ConfigService],
     }),
-    GmailModule,
+    ,
   ],
   providers: [ZendeskService],
   exports: [ZendeskService],

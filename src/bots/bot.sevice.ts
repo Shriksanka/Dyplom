@@ -1,6 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/sequelize';
-import { Bot } from '../database/mysql/models/bot.model';
 
 @Injectable()
 export class BotService {

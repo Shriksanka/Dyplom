@@ -8,7 +8,7 @@ import {
   FxDebtDto,
   FxDebtReportDto,
   AccDataDto,
-} from '../../../bots/p2p/providers/common/dto';
+} from '../../../bots/p2p/dto';
 import { CAPACITY_STATUS_MAP } from './constants';
 
 @Injectable()

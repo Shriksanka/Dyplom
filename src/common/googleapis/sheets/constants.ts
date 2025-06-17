@@ -1,4 +1,4 @@
-import { AccountCapacityDto } from '../../../bots/p2p/providers/common/dto';
+import { AccountCapacityDto } from '../../../bots/p2p/dto';
 
 export const CAPACITY_STATUS_MAP = (
   capacity: AccountCapacityDto[],

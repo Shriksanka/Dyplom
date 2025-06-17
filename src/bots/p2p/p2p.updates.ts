@@ -1,7 +1,6 @@
 import { Update, Ctx, Start, Action, Command } from 'nestjs-telegraf';
 import { Context } from 'telegraf';
 import { callbackQuery } from 'telegraf/filters';
-import { MerchantApiService } from '../../common/merchant/merchant.service';
 import { InjectRepository } from '../../database/redis/core/decoratos';
 import { Repository } from '../../database/redis/core/repository';
 import { Helpers } from '../../common/helpers';
@@ -11,7 +10,6 @@ import { SceneContext } from 'telegraf/scenes';
 @Update()
 export class P2pUpdates {
   constructor(
-    private readonly merchantApiService: MerchantApiService,
     private readonly paymentService: PaymentService,
     @InjectRepository('Otps') private readonly otpRepo: Repository,
   ) {}
@@ -104,90 +102,5 @@ export class P2pUpdates {
   @Command('notify_account')
   async onNotifyAccount(@Ctx() ctx: SceneContext) {
     await ctx.scene.enter('notifyAccount');
-  }
-
-  @Action(/NEFT|IMPS/)
-  async onNeft(@Ctx() ctx: Context) {
-    if (ctx.has(callbackQuery('data'))) {
-      const data = ctx.callbackQuery.data.split('|');
-      const d = await this.merchantApiService.sendWithdrawalType(data[2]); //TODO Nedd implenets this method
-
-      await ctx.editMessageReplyMarkup({ inline_keyboard: [] });
-      await ctx.replyWithHTML(
-        `Operator <b>${ctx.callbackQuery.from.username}</b> chose <b>${data[0]}</b> withdraw type for <b>${data[1]}</b>`,
-      );
-    }
-  }
-
-  @Action('yes')
-  async onOtpRetryYes(@Ctx() ctx: Context) {
-    ctx.reply('Accepted', {
-      reply_parameters: { message_id: ctx.callbackQuery.message.message_id },
-    });
-  }
-
-  @Action('no')
-  async onOtpRetryNo(@Ctx() ctx: Context) {
-    ctx.reply('Accepted', {
-      reply_parameters: { message_id: ctx.callbackQuery.message.message_id },
-    });
-  }
-
-  // @On('text')
-  // async OnText(@Ctx() ctx: OtpContext) {
-  //   if ('text' in ctx?.message) {
-  //     const replyToMes = ctx.message.reply_to_message?.message_id;
-  //     if (replyToMes) {
-  //       if (!isNaN(Number.parseInt(ctx.message.text))) {
-  //         await this.otpRepo.save<Otps>(replyToMes.toString(), {
-  //           text: ctx.message.text,
-  //         });
-  //         await this.otpRepo.expireAt(replyToMes.toString(), 120);
-
-  //         ctx.reply('Accepted', {
-  //           reply_parameters: { message_id: replyToMes },
-  //         });
-  //       }
-  //     }
-  //   }
-  // }
-
-  @Action(/^.*:reconcile$/)
-  async processReconciliation(@Ctx() ctx) {
-    const [date] = ctx.callbackQuery.data.split(':');
-
-    await ctx.reply(`Processing reconciliation for ${date} started...`);
-
-    try {
-      const transactions = await this.merchantApiService.getWithdrawals(date);
-
-      const merchantMap = new Map();
-      for (const transaction of transactions) {
-        if (['SUCCESS', 'FAILED'].includes(transaction['status'])) {
-          merchantMap.set(transaction['external_reference'], transaction);
-        }
-      }
-
-      const payouts = await this.paymentService.getBwjPayouts(date);
-      const missing = payouts.filter((t) => !merchantMap.has(t['agentId']));
-
-      let limited = missing
-        .slice(0, 20)
-        .map((t) => `id: ${t['id']} agentId: ${t['agentId']}`)
-        .join('\n');
-
-      if (missing.length > 20) {
-        limited += '\n...';
-      }
-
-      await ctx.reply(
-        `Reconciliation for ${date} completed. \n Difference: ${
-          missing.length
-        } \n Missing: ${limited || 'No missing transactions'}`,
-      );
-    } catch (error) {
-      console.error('Reconciliation error: ', error?.response?.data || error);
-      await ctx.reply(`Error processing reconciliation for ${date}`);
-    }
   }
 }
